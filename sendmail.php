@@ -8,92 +8,133 @@ require 'PHPMailer/src/SMTP.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    // Sanitize user input
     $name = htmlspecialchars($_POST['name']);
     $email = htmlspecialchars($_POST['email']);
     $message = htmlspecialchars($_POST['message']);
 
-    // ---------- Email to Admin ----------
-    $mail = new PHPMailer(true);
-
     try {
+        // ---------- 1. Email to Admin ----------
+        $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'raushanmansagar12345@gmail.com';
-        $mail->Password = 'ppqv zdri rqjl ftjw'; // App Password
+        $mail->Password = 'ppqv zdri rqjl ftjw';
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
         $mail->setFrom('raushanmansagar12345@gmail.com', 'Ignexus Website');
-        $mail->addAddress('raushanmansagar12345@gmail.com'); 
+        $mail->addAddress('raushanmansagar12345@gmail.com');
         $mail->addReplyTo($email, $name);
 
         $mail->isHTML(true);
-        $mail->Subject = "New Inquiry Submitted on Ignexus from $name";
-        $mail->Body = "
-        <div style='font-family: Arial, sans-serif; background: #f0f4f8; padding: 30px;'>
-            <div style='max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);'>
-                <h2 style='text-align:center; color:#4CAF50;'>🌟 New Message Received!</h2>
-                <p style='text-align:center; color:#555;'>You have a new inquiry from Ignexus website. Details below:</p>
-                <hr style='border:none; border-top:1px solid #eee; margin:20px 0;'>
-                <p style='font-size:16px;'><strong>👤 Name:</strong> $name</p>
-                <p style='font-size:16px;'><strong>📧 Email:</strong> $email</p>
-                <div style='margin-top:20px; padding:15px; background:#f9f9f9; border-left:5px solid #4CAF50;'>
-                    <p style='font-size:16px; margin:0;'><strong>💬 Message:</strong></p>
-                    <p style='font-size:15px; color:#444;'>" . nl2br($message) . "</p>
+        $mail->Subject = " New Inquiry from $name - Ignexus";
+
+        $mail->Body = '
+        <html>
+        <head>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin:0; padding:0;}
+            .container { max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; }
+            .header { background: #4CAF50; color: #ffffff; text-align: center; padding: 20px;}
+            .header img { max-height: 50px; display: block; margin: auto; }
+            .content { padding: 30px; color: #333; }
+            .message-box { padding:15px; background:#f9f9f9; border-left:5px solid #4CAF50; margin-top:10px;}
+            .footer { background: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #888;}
+        </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <img src="https://ignexus.in/ignexus/images/oie_8135719L4eGjFJ2.png" alt="Ignexus Logo">
+                    <h2>New Inquiry Received</h2>
                 </div>
-                <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
-                <p style='text-align:center; font-size:14px; color:#999;'>This message was automatically sent from Ignexus contact form.</p>
+                <div class="content">
+                    <p><strong>👤 Name:</strong> '.$name.'</p>
+                    <p><strong>📧 Email:</strong> '.$email.'</p>
+                    <p><strong>💬 Message:</strong></p>
+                    <div class="message-box">'.nl2br($message).'</div>
+                </div>
+                <div class="footer">
+                    This message was sent automatically from the Ignexus website.
+                    <br>
+                    <a href="https://www.ignexus.in" style="color:#4CAF50; text-decoration:none;">www.ignexus.in</a>
+                </div>
             </div>
-        </div>";
+        </body>
+        </html>';
 
         $mail->send();
 
-        // ---------- Confirmation Email to User ----------
+        // ---------- 2. Confirmation Email to User ----------
         $confirmation = new PHPMailer(true);
+        $confirmation->isSMTP();
+        $confirmation->Host = 'smtp.gmail.com';
+        $confirmation->SMTPAuth = true;
+        $confirmation->Username = 'raushanmansagar12345@gmail.com';
+        $confirmation->Password = 'ppqv zdri rqjl ftjw';
+        $confirmation->SMTPSecure = 'tls';
+        $confirmation->Port = 587;
 
-        try {
-            $confirmation->isSMTP();
-            $confirmation->Host = 'smtp.gmail.com';
-            $confirmation->SMTPAuth = true;
-            $confirmation->Username = 'raushanmansagar12345@gmail.com';
-            $confirmation->Password = 'ppqv zdri rqjl ftjw';
-            $confirmation->SMTPSecure = 'tls';
-            $confirmation->Port = 587;
+        $confirmation->setFrom('raushanmansagar12345@gmail.com', 'Ignexus Website');
+        $confirmation->addAddress($email, $name);
+        $confirmation->addReplyTo('raushanmansagar12345@gmail.com', 'Ignexus Team');
 
-            $confirmation->setFrom('raushanmansagar12345@gmail.com', 'Ignexus Website');
-            $confirmation->addAddress($email, $name);
-            $confirmation->addReplyTo('raushanmansagar12345@gmail.com', 'Ignexus Team');
+        $confirmation->isHTML(true);
+        $confirmation->Subject = " Your Inquiry Has Been Received - Ignexus";
 
-            $confirmation->isHTML(true);
-            $confirmation->Subject = "Your Inquiry Has Been Successfully Submitted to Ignexus";
-
-            $confirmation->Body = "
-            <div style='font-family: Arial, sans-serif; background: #e6f7ff; padding: 30px;'>
-                <div style='max-width:600px; margin:auto; background:#ffffff; border-radius:12px; padding:30px; box-shadow:0 8px 20px rgba(0,0,0,0.1);'>
-                    <h2 style='text-align:center; color:#4CAF50;'> Hello $name!</h2>
-                    <p style='text-align:center; color:#555;'>Thank you for contacting Ignexus. Your inquiry has been successfully submitted.</p>
-                    <hr style='border:none; border-top:1px solid #eee; margin:20px 0;'>
-                    <p style='font-size:16px;'><strong>📧 Your Email:</strong> $email</p>
-                    <div style='margin-top:20px; padding:15px; background:#f9f9f9; border-left:5px solid #4CAF50;'>
-                        <p style='font-size:16px; margin:0;'><strong>💬 Your Message:</strong></p>
-                        <p style='font-size:15px; color:#444;'>" . nl2br($message) . "</p>
-                    </div>
-                    <hr style='border:none; border-top:1px solid #eee; margin:25px 0;'>
-                    <p style='text-align:center; font-size:14px; color:#999;'>We will get back to you as soon as possible.<br>– The Ignexus Team</p>
+        $confirmation->Body = '
+        <html>
+        <head>
+        <style>
+            body { font-family: Arial, sans-serif; background-color:#e6f7ff; margin:0; padding:0;}
+            .container { max-width:600px; margin:auto; background:#ffffff; border-radius:10px; overflow:hidden;}
+            .header { background:#4CAF50; color:#ffffff; text-align:center; padding:20px;}
+            .header img { max-height:50px; display:block; margin:auto; }
+            .content { padding:30px; color:#333;}
+            .message-box { padding:15px; background:#f9f9f9; border-left:5px solid #4CAF50; margin-top:10px;}
+            .button { display:inline-block; background:#4CAF50; color:#fff; text-decoration:none; padding:10px 20px; border-radius:5px; margin-top:15px;}
+            .footer { background:#f0f8ff; padding:15px; text-align:center; font-size:12px; color:#888;}
+            .social-icons img { width:24px; height:24px; margin:0 5px;}
+        </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <img src="https://ignexus.in/ignexus/images/oie_8135719L4eGjFJ2.png" alt="Ignexus Logo">
+                    <h2>Thank You, '.$name.'</h2>
                 </div>
-            </div>";
+                <div class="content">
+                    <p>We have received your inquiry and will get back to you shortly.</p>
+                    <hr style="border:none; border-top:1px solid #eee; margin:20px 0;">
+                    <p><strong>📧 Your Email:</strong> '.$email.'</p>
+                    <p><strong>💬 Your Message:</strong></p>
+                    <div class="message-box">'.nl2br($message).'</div>
+                    <p style="text-align:center;">
+                        <a href="https://www.ignexus.in" class="button">Visit Our Website</a>
+                    </p>
+                </div>
+                <div class="footer">
+                    Connect with us:
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/ignexus" target="_blank"><img src="https://img.icons8.com/color/48/000000/facebook-new.png"/></a>
+                        <a href="https://www.linkedin.com/company/ignexus" target="_blank"><img src="https://img.icons8.com/color/48/000000/linkedin.png"/></a>
+                        <a href="https://twitter.com/ignexus" target="_blank"><img src="https://img.icons8.com/color/48/000000/twitter.png"/></a>
+                    </div>
+                    <br>
+                    Ignexus | <a href="https://www.ignexus.in" style="color:#4CAF50; text-decoration:none;">www.ignexus.in</a>
+                </div>
+            </div>
+        </body>
+        </html>';
 
-            $confirmation->send();
+        $confirmation->send();
 
-            echo "Message sent successfully! A vibrant confirmation email has been sent to $email.";
-
-        } catch (Exception $e) {
-            echo "Message sent to admin, but confirmation email failed: {$confirmation->ErrorInfo}";
-        }
+        echo "Message sent successfully! A professional confirmation email has been sent to $email.";
 
     } catch (Exception $e) {
-        echo "Error sending email to admin: {$mail->ErrorInfo}";
+        echo "Error sending email: {$e->getMessage()}";
     }
 }
 ?>
